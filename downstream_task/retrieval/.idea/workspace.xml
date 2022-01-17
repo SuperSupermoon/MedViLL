@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="326a0122-9967-4bdb-9d20-96c680582fd7" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/../classification/.idea/classification.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/CXR-BERT2.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/CXR-BERT2.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/deployment.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/webServers.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/webServers.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/dataset_origin.py" beforeDir="false" afterPath="$PROJECT_DIR$/../data/dataset_origin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../data/helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/../data/helper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../main_origin.py" beforeDir="false" afterPath="$PROJECT_DIR$/../main_origin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../models/cxrbert_origin.py" beforeDir="false" afterPath="$PROJECT_DIR$/../models/cxrbert_origin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../models/train_origin.py" beforeDir="false" afterPath="$PROJECT_DIR$/../models/train_origin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataset_retrieval.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataset_retrieval.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_retrieval.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_retrieval.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/retrieval.py" beforeDir="false" afterPath="$PROJECT_DIR$/retrieval.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_ir.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_ir.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="JupyterTrust" id="f9f56b1c-1992-4a26-9ae2-d5f9a92921ed" />
+  <component name="ProjectId" id="1muWmX6bvT6ZPF2tjqFdlv7Eoga" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="326a0122-9967-4bdb-9d20-96c680582fd7" name="Default Changelist" comment="" />
+      <created>1610344115175</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1610344115175</updated>
+      <workItem from="1610344116300" duration="12000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1661" y="164" key="SettingsEditor" timestamp="1610344127162">
+      <screen x="1200" y="0" width="1920" height="1040" />
+    </state>
+    <state x="1661" y="164" key="SettingsEditor/0.0.1200.1839/1200.0.1920.1040/3120.0.1920.1160@1200.0.1920.1040" timestamp="1610344127162" />
+  </component>
+</project>

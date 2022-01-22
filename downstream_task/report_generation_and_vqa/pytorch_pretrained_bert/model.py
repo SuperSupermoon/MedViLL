@@ -909,20 +909,17 @@ class BertForPreTrainingLossMask(PreTrainedBertModel):
 
         self.txt_embeddings = bert.embeddings
         self.img_embeddings = ImageBertEmbeddings(args, self.txt_embeddings)        
+
         if args.img_encoding == 'random_sample':
             self.img_encoder = pixel_random_sample(args)
-            for p in self.img_encoder.parameters():
-                p.requires_grad = False
-            for c in list(self.img_encoder.children())[5:]:
-                for p in c.parameters():
-                    p.requires_grad = True
         elif args.img_encoding == 'fully_use_cnn':    
             self.img_encoder = pixel_full_sampling()
-            for p in self.img_encoder.parameters():
-                p.requires_grad = False
-            for c in list(self.img_encoder.children())[5:]:
-                for p in c.parameters():
-                    p.requires_grad = True
+        for p in self.img_encoder.parameters():
+            p.requires_grad = False
+        for c in list(self.img_encoder.children())[5:]:
+            for p in c.parameters():
+                p.requires_grad = True
+
         self.encoder = bert.encoder
         self.pooler = bert.pooler
         self.apply(self.init_bert_weights)
@@ -1067,18 +1064,14 @@ class CXRBertDecoder(nn.Module):  # MultimodalBertEncoder, BERT
         
         if args.img_encoding == 'random_sample':
             self.img_encoder = pixel_random_sample(args)
-            for p in self.img_encoder.parameters():
-                p.requires_grad = False
-            for c in list(self.img_encoder.children())[5:]:
-                for p in c.parameters():
-                    p.requires_grad = True
         elif args.img_encoding == 'fully_use_cnn':    
             self.img_encoder = pixel_full_sampling()
-            for p in self.img_encoder.parameters():
-                p.requires_grad = False
-            for c in list(self.img_encoder.children())[5:]:
-                for p in c.parameters():
-                    p.requires_grad = True
+        for p in self.img_encoder.parameters():
+            p.requires_grad = False
+        for c in list(self.img_encoder.children())[5:]:
+            for p in c.parameters():
+                p.requires_grad = True
+
         self.encoder = bert.encoder
         self.pooler = bert.pooler
 

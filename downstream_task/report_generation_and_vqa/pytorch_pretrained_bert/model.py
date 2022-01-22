@@ -886,12 +886,11 @@ class ImageBertEmbeddings(nn.Module):
         )
         
         if self.args.img_postion:
-            position_ids = torch.arange(seq_len, dtype=torch.long).cuda()
-            position_ids = position_ids.unsqueeze(0).expand(bsz, seq_len)
+            position_ids = torch.tensor([0, seq_len-1], dtype=torch.long).cuda()
+            position_ids = position_ids.unsqueeze(0).expand(bsz, 2)
             position_embeddings = self.position_embeddings(position_ids)
             pos_vis_embeddings = self.position_embeddings(vis_pe)
-            token_position_embeddings = torch.cat((position_embeddings[:,:1], pos_vis_embeddings, position_embeddings[:,self.args.len_vis_input+1:]), dim=1)
-            
+            token_position_embeddings = torch.cat((position_embeddings[:,:1], pos_vis_embeddings, position_embeddings[:,-1:]), dim=1)
             embeddings = token_embeddings + token_position_embeddings + token_type_embeddings  # should be tensor
         else: 
             embeddings = token_embeddings + token_type_embeddings  # should be tensor

@@ -175,14 +175,15 @@ def main():
                 w_list.append(w)
         forbid_ignore_set = set(tokenizer.convert_tokens_to_ids(w_list))
 
-    model = BertForSeq2SeqDecoder.from_pretrained(args.bert_model,
-            max_position_embeddings=args.max_position_embeddings, config_path=args.config_path,
-            state_dict={}, args=args, num_labels=cls_num_labels,
-            type_vocab_size=type_vocab_size, task_idx=3, mask_word_id=mask_word_id,
-            search_beam_size=args.beam_size, length_penalty=args.length_penalty,
-            eos_id=eos_word_ids, forbid_duplicate_ngrams=args.forbid_duplicate_ngrams,
-            forbid_ignore_set=forbid_ignore_set, ngram_size=args.ngram_size, min_len=args.min_len,
-            len_vis_input=args.len_vis_input)
+    # unused
+    # model = BertForSeq2SeqDecoder.from_pretrained(args.bert_model,
+    #         max_position_embeddings=args.max_position_embeddings, config_path=args.config_path,
+    #         state_dict={}, args=args, num_labels=cls_num_labels,
+    #         type_vocab_size=type_vocab_size, task_idx=3, mask_word_id=mask_word_id,
+    #         search_beam_size=args.beam_size, length_penalty=args.length_penalty,
+    #         eos_id=eos_word_ids, forbid_duplicate_ngrams=args.forbid_duplicate_ngrams,
+    #         forbid_ignore_set=forbid_ignore_set, ngram_size=args.ngram_size, min_len=args.min_len,
+    #         len_vis_input=args.len_vis_input)
     
     max_a, max_b, max_c, max_d = [], [], [], []
     # for epoch_itr in range(10,int(args.model_recover_path.split('.')[-2])+1):
@@ -203,7 +204,7 @@ def main():
                 max_position_embeddings=args.max_position_embeddings, config_path=args.config_path,
                 state_dict=model_recover, args=args, num_labels=cls_num_labels,
                 type_vocab_size=type_vocab_size, task_idx=3, mask_word_id=mask_word_id,
-                search_beam_size=args.beam_size, length_penalty=args.length_penalty,
+                length_penalty=args.length_penalty,
                 eos_id=eos_word_ids, forbid_duplicate_ngrams=args.forbid_duplicate_ngrams,
                 forbid_ignore_set=forbid_ignore_set, ngram_size=args.ngram_size, min_len=args.min_len,
                 len_vis_input=args.len_vis_input)

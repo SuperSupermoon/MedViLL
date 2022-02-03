@@ -16,12 +16,12 @@ import torch.nn as nn
 import torchvision
 import csv
 from transformers import BertTokenizer
-from pytorch_pretrained_bert.modeling_like_cxrbert import BertForSeq2SeqDecoder
+from pytorch_pretrained_bert.model import BertForSeq2SeqDecoder
 
-import sc.seq2seq_loader_itm as seq2seq_loader
-from sc.bleu import language_eval_bleu
-from misc.data_parallel import DataParallelImbalance
-from sc.image_embedding import Img_patch_embedding, fully_sampling, random_sampling
+# import sc.seq2seq_loader_itm as seq2seq_loader
+from data_loader import Preprocess4Seq2seqDecoder
+from bleu import language_eval_bleu
+from data_parallel import DataParallelImbalance
 
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
@@ -148,7 +148,7 @@ def main():
 
     bi_uni_pipeline = []
     # def __init__(self, tokenizer, max_len, max_txt_length, new_segment_ids=False, mode="s2s", len_vis_input=None):
-    bi_uni_pipeline.append(seq2seq_loader.Preprocess4Seq2seqDecoder(tokenizer, args.max_seq_length,
+    bi_uni_pipeline.append(Preprocess4Seq2seqDecoder(tokenizer, args.max_seq_length,
         max_txt_length=args.max_txt_length, new_segment_ids=args.new_segment_ids,
         mode='s2s', len_vis_input=args.len_vis_input))
 

@@ -38,6 +38,7 @@ class pixel_full_sampling(nn.Module):
         super(pixel_full_sampling, self).__init__()
         # self.args = args
         model = torchvision.models.resnet50(pretrained=True)
+        # modules = list(model.children())[:-1]
         modules = list(model.children())[:-2]
         self.model = nn.Sequential(*modules)
 
@@ -47,17 +48,25 @@ class pixel_full_sampling(nn.Module):
         self.pool = pool_func((3, 1))
     def forward(self, x):
         out = self.model(x)
+        # print("11 out", out.shape)
         out = torch.flatten(out, start_dim=2) #out torch.Size([100, 2048, 3])
+        # print("22 out", out.shape)
         out = out.transpose(1, 2).contiguous() #out torch.Size([100, 3, 2048])
+        # print("33 out", out.shape)
+        
         vis_pe = torch.arange(out.size()[1], dtype=torch.long).cuda()
         vis_pe = vis_pe.unsqueeze(0).expand(out.size()[0], out.size()[1])
+        
+        # print("out", out.shape)
+        # print("vis_pe", vis_pe.shape)
+        # exit()
         return out, vis_pe
 
 class pixel_random_sample(nn.Module):
     def __init__(self, args):
         super(pixel_random_sample, self).__init__()
         self.args = args
-        model = torchvision.models.resnet50(pretrained=True)
+        model = torchvision.models.densenet121(pretrained=True)
         modules = list(model.children())[:-2]
         self.model = nn.Sequential(*modules)
 
@@ -1013,28 +1022,31 @@ class BertForPreTrainingLossMask(PreTrainedBertModel):
             score = 0
             num_data = 0
             assert(ans_labels is not None)
-            vqa_embed = sequence_output[:, 0]
+            # vqa_embed = sequence_output[:, 0]
+            vqa_embed = sequence_output[:, 0]*sequence_output[:, self.len_vis_input+1]
             vqa_pred = self.ans_classifier(vqa_embed)  # Linear & activation & Linear 가능한 정답 개수인 458차원으로 줄여줌
             vqa_loss = self.vqa_crit(vqa_pred, ans_labels)
-            batch_score = compute_score_with_logits(vqa_pred, ans_labels).sum(dim=1)   # 맞춘 개수   torch.Size([B])
 
-            closed_ans_score = []
-            open_ans_score = []
+            batch_score = compute_score_with_logits(vqa_pred, ans_labels).sum(dim=1)   # 맞춘 개수   torch.Size([B])
+            vqa_acc = batch_score.sum() / vqa_pred.size(0)
+
+            # print("vqa_ total acc", vqa_acc)
+            closed_ans_score, open_ans_score = [], []
             for i in range(len(ans_type)):
                 if ans_type[i] == 0:
+                    # print("batch_score[i].item()", batch_score[i].item())
                     closed_ans_score.append(batch_score[i].item())
                 elif ans_type[i] == 1:
+                    # print("batch_score[i].item()", batch_score[i].item())
                     open_ans_score.append(batch_score[i].item())
-            
-            num_data = vqa_pred.size(0)
-            vqa_acc = batch_score.sum() / num_data
-            closed_correct = sum(closed_ans_score)
-            open_correct = sum(open_ans_score)
 
-            closed_num = len(closed_ans_score)
-            open_num = len(open_ans_score)
+            if len(closed_ans_score) != 0:
+                closed_ans_score = sum(closed_ans_score)/len(closed_ans_score)
 
-            return dummy_value, vqa_loss
+            if len(open_ans_score) != 0:
+                open_ans_score = sum(open_ans_score)/len(open_ans_score)
+
+            return dummy_value, vqa_loss, vqa_acc, closed_ans_score, open_ans_score
         else:
             sequence_output_masked = gather_seq_out_by_pos(sequence_output, masked_pos)
             prediction_scores_masked, _ = self.cls(
@@ -1047,7 +1059,7 @@ class BertForPreTrainingLossMask(PreTrainedBertModel):
                     prediction_scores_masked.transpose(1, 2).float(), masked_lm_labels)
             masked_lm_loss = loss_mask_and_normalize(
                 masked_lm_loss.float(), masked_weights, drop_worst_ratio)
-            return masked_lm_loss, dummy_value
+            return masked_lm_loss, dummy_value, dummy_value, dummy_value, dummy_value
 
 
 class CXRBertDecoder(nn.Module):  # MultimodalBertEncoder, BERT
@@ -1167,18 +1179,16 @@ class BertForSeq2SeqDecoder(PreTrainedBertModel):
             curr_length = list(curr_ids.size())[1]
             start_pos = next_pos - curr_length
             a = gt_token.tolist()
-
             if curr_length == 1:# and start_pos-258  < len(a[0]):
                 a_list = []
                 for itr in range(0,torch.tensor(a).size()[0]):
                     a_list.append([a[itr][start_pos-258]])
-
                 b = torch.cat([torch.tensor(a_list)], dim=1).to(device)
                 x_input_ids = torch.cat((b, mask_ids), dim=1)
             else: 
                 x_input_ids = torch.cat((curr_ids, mask_ids), dim=1)
-
-            gt_id = curr_ids.new_tensor([a[0]])
+                
+            # x_input_ids = torch.cat((curr_ids, mask_ids), dim=1)
 
             curr_token_type_ids = token_type_ids[:, start_pos:next_pos + 1]
             curr_attention_mask = attention_mask[:,

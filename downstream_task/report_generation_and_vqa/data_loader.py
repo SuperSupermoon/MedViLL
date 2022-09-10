@@ -211,14 +211,11 @@ class Img2txtDataset(torch.utils.data.Dataset):
 
         # read the file into memory
         self.ex_list = []
-
         if tasks == 'report_generation':
             counter = 0
-            
             if self.data_set == 'valid':
                 img_dat = [json.loads(l) for l in open(file_valid_jpgs)]
                 print('Loading {0} valid JPG IDs!'.format(len(img_dat)))
-            
             else: 
                 img_dat = [json.loads(l) for l in open(file_src)]
                 print('Loading {0} train JPG IDs!'.format(len(img_dat))) 
@@ -232,16 +229,13 @@ class Img2txtDataset(torch.utils.data.Dataset):
                 else: pass
                 self.ex_list.append((src_tk, tokenizer.tokenize(tgt_tk), 1, {'answer_type': ['dummy']}, {'image_organ': ['dummy']}))              
                 counter += 1        
-
         else:
             ans2label_path = os.path.join(file_src, 'cache', 'trainval_ans2label.pkl')
             label2ans_path = os.path.join(file_src, 'cache', 'trainval_label2ans.pkl')
             self.ans2label = cPickle.load(open(ans2label_path, 'rb'))   
             self.label2ans = cPickle.load(open(label2ans_path, 'rb'))   
             self.num_ans_candidates = len(self.ans2label) 
-
             self.img_id2idx = json.load(open(os.path.join(file_src, 'imgid2idx.json'))) 
-
             self.entries = _load_dataset(args, file_src, self.data_set, self.img_id2idx, self.label2ans) 
 
             for entry in self.entries:
@@ -262,7 +256,6 @@ class Img2txtDataset(torch.utils.data.Dataset):
                         entry['answer']['scores'] = None
 
                 src_tk = '/home/mimic-cxr/dataset/vqa_image/vqa_512_3ch/'+entry['image_name']
-
                 labels = answer['labels']
                 scores = answer['scores']
             
@@ -296,6 +289,7 @@ class Preprocess4Seq2seq(Pipeline):
     """ Pre-processing steps for pretraining transformer """
     def __init__(self, args, max_pred, mask_prob, vocab_words, indexer, max_len, bar, block_mask=False, new_segment_ids=False, truncate_config={}, mode=None, len_vis_input=None, local_rank=-1, load_vqa_set=False):
         super().__init__()
+        self.args = args
         self.tasks = args.tasks
         self.max_pred = max_pred  # max tokens of prediction
         self.mask_prob = mask_prob  # masking probability
@@ -320,7 +314,6 @@ class Preprocess4Seq2seq(Pipeline):
         self.len_vis_input = len_vis_input
 
         # for images
-        self.Resize = transforms.Resize(224)
         self.gray_scale_3ch = transforms.Grayscale(num_output_channels=3)
         self.ToTensor = transforms.ToTensor()
         self.res_Normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -355,24 +348,18 @@ class Preprocess4Seq2seq(Pipeline):
             # candidate positions of masked tokens
             cand_pos = []
             special_pos = set()
-            
-
             for i, tk in enumerate(tokens):
                 if (i >= len(tokens_a)+2) and (tk != '[CLS]'):
                     cand_pos.append(i)
                 else:
                     special_pos.add(i)
-
-            
             shuffle(cand_pos)
             if random.random() > 0.5:   #Last SEP token 50% mask prob.
                 masked_pos = cand_pos[:n_pred-1]
                 masked_pos.append(len(tokens)-1)
             else:
                 masked_pos = cand_pos[:n_pred]
-                
             masked_tokens = [tokens[pos] for pos in masked_pos]
-
             for pos in masked_pos:
                 tokens[pos] = '[MASK]'
         else:
@@ -424,15 +411,33 @@ class Preprocess4Seq2seq(Pipeline):
         static_path = change_path[-1:]
         static_path = "/".join(static_path)
 
-        if fixed_path == '/home/mimic-cxr/dataset/vqa_image/vqa_512_3ch':
-            fixed_path = '/home/data_storage/mimic-cxr/dataset/data_RAD/images/'
-            img_path = fixed_path + static_path
-            
+        if self.args.s2s_prob == 1:
+            change_path = img_path.split('/')
+            fixed_path = change_path[:-2]
+            fixed_path = "/".join(fixed_path)
+            static_path = change_path[-2:]
+            static_path = "/".join(static_path)            
+            if fixed_path == '/home/mimic-cxr/dataset/image_preprocessing/re_512_3ch':
+                fixed_path = '/home/data_storage/mimic-cxr/dataset/image_preprocessing/re_512_3ch/'
+                img_path = fixed_path + static_path
+        else:
+            change_path = img_path.split('/')
+            fixed_path = change_path[:-1]
+            fixed_path = "/".join(fixed_path)
+            static_path = change_path[-1:]
+            static_path = "/".join(static_path)
+            if fixed_path == '/home/mimic-cxr/dataset/vqa_image/vqa_512_3ch':
+                fixed_path = '/home/data_storage/mimic-cxr/dataset/data_RAD/images/'
+                img_path = fixed_path + static_path
+
+
         # loading images
         img = Image.open(img_path)
         img = self.gray_scale_3ch(img)
-        if self.len_vis_input < 100:
-            img = self.Resize(img)
+        if  self.len_vis_input < 100:
+            img = transforms.Resize([224, 224])(img)
+        elif self.tasks == 'vqa':
+            img = transforms.Resize([512, 512])(img)
         else: pass
         img = self.ToTensor(img)
         img = self.res_Normalize(img)
@@ -452,13 +457,10 @@ class Preprocess4Seq2seq(Pipeline):
                 organ = torch.tensor(1)
             elif organ == "ABD":
                 organ = torch.tensor(2)
-
         else:
             ans_tk = torch.tensor(0)
             ans_type = torch.tensor(0)
             organ = torch.tensor(0)
-        
-        
         return (input_ids, segment_ids, input_mask, masked_ids, masked_pos, masked_weights, self.task_idx, img, vis_pe, ans_tk, ans_type, organ)
 
 
@@ -539,9 +541,6 @@ class Preprocess4Seq2seqDecoder(Pipeline):
 
         img = Image.open(img_path)
         img = self.gray_scale_3ch(img)
-        if self.len_vis_input < 100:
-            img = self.Resize(img)
-        else: pass
         img = self.ToTensor(img)
         img = self.res_Normalize(img)
         

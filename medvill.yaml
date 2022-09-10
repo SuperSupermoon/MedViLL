@@ -123,5 +123,4 @@ dependencies:
     - watchdog==0.10.4
     - werkzeug==1.0.1
     - zope-interface==5.2.0
-prefix: /home/jhmoon/anaconda3/envs/medvill
 

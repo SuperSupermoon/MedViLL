@@ -25,8 +25,6 @@ from data_parallel import DataParallelImbalance
 from collections import defaultdict
 import pickle
 import re
-import time
-
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -75,8 +73,8 @@ def main():
                     help="global_rank for distributed training on gpus")
     parser.add_argument("--random_bootstrap_testnum",
                     type=int,
-                    default=2,
-                    help="Random bootstrap num of Iteration")
+                    default=30,
+                    help="global_rank for distributed training on gpus")
     parser.add_argument("--eval_model", default='pretrained_', type=str, help="designate your test model to extract your label from gen report.")
 
     parser.add_argument('--wandb', action='store_true', default = False,
@@ -102,7 +100,7 @@ def main():
                         help="Set this flag if you are using an uncased model.")
     parser.add_argument('--new_segment_ids', action='store_true', default = False,
                         help="Use new segment ids for bi-uni-directional LM.")
-    parser.add_argument('--batch_size', type=int, default=1,
+    parser.add_argument('--batch_size', type=int, default=60,
                         help="Batch size for decoding.") #160
     parser.add_argument('--beam_size', type=int, default=1,
                         help="Beam size for searching")
@@ -250,9 +248,6 @@ def main():
             total_score = []
             model.eval()
             print('start the caption evaluation...')
-            
-            start = time.time()
-
             with tqdm(total=total_batch) as pbar:
                 while next_i < len(input_lines):
                     _chunk = input_lines[next_i:next_i + args.batch_size] 
@@ -303,9 +298,7 @@ def main():
                                 total_score.append(ppl.item())
                             else:
                                 pass
-                end = time.time()
-                print(end - start)
-                exit()
+
             if args.beam_size == 1:
                 predictions = [{'image_id': tup[1], 'gt_caption': tup[-1], 'gt_label': tup[-2], 'gen_caption': output_lines[img_idx]} for img_idx, tup in enumerate(input_lines)]
                 print("avg ppl: ",np.mean(total_score))
@@ -356,7 +349,7 @@ def main():
         # exit()
 
 if __name__ == "__main__":
-    # with open('/home/jhmoon/MedViLL/final_vqa_tr_ft_random30_github_non_cross_all_50ep.pickle', 'rb') as f:
+    # with open('/home/jhmoon/MedViLL/all_random30_beam1_base_bi_openi_2_10ep_gen.pickle', 'rb') as f:
     #     b = pickle.load(f)
     # print(b)
     # exit()

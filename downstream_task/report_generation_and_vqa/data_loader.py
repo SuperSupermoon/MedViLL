@@ -411,7 +411,8 @@ class Preprocess4Seq2seq(Pipeline):
         static_path = change_path[-1:]
         static_path = "/".join(static_path)
 
-        if self.args.s2s_prob == 1:
+        # Hard coded part to fix the path.
+        if self.args.s2s_prob == 1: # report generation. 
             change_path = img_path.split('/')
             fixed_path = change_path[:-2]
             fixed_path = "/".join(fixed_path)

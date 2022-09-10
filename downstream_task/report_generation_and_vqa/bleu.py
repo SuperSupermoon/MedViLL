@@ -20,11 +20,11 @@ from chexpert_labeler.constants.constants import *
 
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_auc_score, multilabel_confusion_matrix
 
-extractor = Extractor('/home/jhmoon/MedViLL/downstream_task/report_generation_and_vqa/chexpert_labeler/phrases/mention',
-                        '/home/jhmoon/MedViLL/downstream_task/report_generation_and_vqa/chexpert_labeler/phrases/unmention')
-classifier = Classifier('/home/jhmoon/MedViLL/downstream_task/report_generation_and_vqa/chexpert_labeler/patterns/pre_negation_uncertainty.txt',
-                        '/home/jhmoon/MedViLL/downstream_task/report_generation_and_vqa/chexpert_labeler/patterns/negation.txt',
-                        '/home/jhmoon/MedViLL/downstream_task/report_generation_and_vqa/chexpert_labeler/patterns/post_negation_uncertainty.txt')
+extractor = Extractor('downstream_task/report_generation_and_vqa/chexpert_labeler/phrases/mention',
+                        'downstream_task/report_generation_and_vqa/chexpert_labeler/phrases/unmention')
+classifier = Classifier('downstream_task/report_generation_and_vqa/chexpert_labeler/patterns/pre_negation_uncertainty.txt',
+                        'downstream_task/report_generation_and_vqa/chexpert_labeler/patterns/negation.txt',
+                        'downstream_task/report_generation_and_vqa/chexpert_labeler/patterns/post_negation_uncertainty.txt')
 aggregator = Aggregator(CATEGORIES)
 
 
@@ -73,72 +73,6 @@ def label(hypo_path, ref_path, output_path):
     ref_labeled_reports = ref_labeled_reports[[REPORTS] + CATEGORIES][1:]#.fillna(0)
     ref_labeled_reports.to_csv(output_path+"ref_label.csv", index=False)  #column name del.
     return hypo_labeled_reports, ref_labeled_reports
-
-
-
-def get_label_accuracy_v3(df_hyp, df_ref):
-    df_hyp_pos1 = (df_hyp == 1).astype(int)
-    # del df_hyp_pos1["Reports"]
-    # df_hyp_pos1 = np.array(df_hyp_pos1)
-    # print("df_hyp_pos1", df_hyp_pos1[0])
-
-    df_ref_pos1 = (df_ref == 1).astype(int)
-    # del df_ref_pos1["Reports"]
-    # df_ref_pos1 = np.array(df_ref_pos1)
-    # print("df_ref_pos1", df_ref_pos1[0])
-
-
-    all_result = (df_hyp == df_ref)
-
-    acc_list = []
-    pos_precision = []
-    pos_f1 = []
-    pos_recall = []
-    all_precision_lt = []
-    all_recall_lt = []
-    all_f1_lt = []
-
-    for row in range(len(df_hyp)):
-        if len(df_ref_pos1.loc[row].unique()) != 1:
-            positive_precision = precision_score(df_ref_pos1.loc[row],df_hyp_pos1.loc[row], average="binary", pos_label=True)
-            positive_recall = recall_score(df_ref_pos1.loc[row],df_hyp_pos1.loc[row], average="binary", pos_label=True)
-            pos_precision.append(positive_precision)
-            pos_recall.append(positive_recall)
-            f1_pos1 = f1_score(df_ref_pos1.loc[row], df_hyp_pos1.loc[row], average="binary", zero_division=0)
-            pos_f1.append(f1_pos1)
-
-        acc_for_every_class = accuracy_score(df_ref.iloc[row,1:].fillna(0).values, df_hyp.iloc[row,1:].fillna(0).values)
-        
-        all_precision = precision_score(df_ref.iloc[row,1:].fillna(0).values, df_hyp.iloc[row,1:].fillna(0).values, average='micro')
-        all_recall = recall_score(df_ref.iloc[row,1:].fillna(0).values, df_hyp.iloc[row,1:].fillna(0).values, average='micro')
-        all_f1 = f1_score(df_ref.iloc[row,1:].fillna(0).values, df_hyp.iloc[row,1:].fillna(0).values, average="micro", zero_division=0)
-
-        acc_list.append(acc_for_every_class)
-        all_precision_lt.append(all_precision)
-        all_recall_lt.append(all_recall)
-        all_f1_lt.append(all_f1)
-
-    acc_array = np.mean(acc_list)
-    pos_precision = np.mean(pos_precision)
-    pos_recall = np.mean(pos_recall)
-    pos_f1 = np.mean(pos_f1)
-    all_precision_lt = np.mean(all_precision_lt)
-    all_recall_lt = np.mean(all_recall_lt)
-    all_f1_lt = np.mean(all_f1_lt)
-
-    print("acc_array", acc_array)
-    print("pos_precision", pos_precision)
-    print("pos_recall", pos_recall)
-    print("pos_f1", pos_f1)
-    print("all_precision_lt", all_precision_lt)
-    print("all_recall_lt", all_recall_lt)
-    print("all_f1_lt", all_f1_lt)
-
-    input("STOP!")
-    (accuracy_pos1, precision_pos1, recall_pos1, f1_pos1, auroc_pos1)
-
-    return acc_array, pos_precision, pos_recall, all_precision_lt, all_recall_lt
-
 
 
 def get_label_accuracy(df_hyp, df_ref):
@@ -216,22 +150,15 @@ def get_label_accuracy(df_hyp, df_ref):
     f1_all = 2 / (1/precision_all + 1/recall_all)
 
     # AUROC
-    '''
-    precision fall_out fpr 정밀도 
-    recall sensitivity, tpr 재현율
-    auc(fpr, tpr)
-    '''    #There is way to compute weighted AUC. compare it with TieNet results.
     auroc_pos1 = roc_auc_score(df_ref_pos1, df_hyp_pos1, average="micro")
     auroc_0 = roc_auc_score(df_ref_0, df_hyp_0, average="micro")
     auroc_neg1 = roc_auc_score(df_ref_neg1, df_hyp_neg1, average="micro")
     auroc_all = roc_auc_score(df_ref_all, df_hyp_all, average="micro")
     
-    # all에서 클래스별로 acc, precision, recall, f1구하기
     accuracy_all_list = []
     precision_all_list = []
     recall_all_list = []
     f1_all_list = []
-
     for i in range(df_all_matching.shape[1]):
         acc = df_all_matching[:,i].sum() / df_all_matching[:,i].size
         pcn = df_all_matching_exclude_TN[:,i].sum() / df_hyp_all[:,i].sum()

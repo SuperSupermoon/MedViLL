@@ -1030,14 +1030,11 @@ class BertForPreTrainingLossMask(PreTrainedBertModel):
             batch_score = compute_score_with_logits(vqa_pred, ans_labels).sum(dim=1)   # 맞춘 개수   torch.Size([B])
             vqa_acc = batch_score.sum() / vqa_pred.size(0)
 
-            # print("vqa_ total acc", vqa_acc)
             closed_ans_score, open_ans_score = [], []
             for i in range(len(ans_type)):
                 if ans_type[i] == 0:
-                    # print("batch_score[i].item()", batch_score[i].item())
                     closed_ans_score.append(batch_score[i].item())
                 elif ans_type[i] == 1:
-                    # print("batch_score[i].item()", batch_score[i].item())
                     open_ans_score.append(batch_score[i].item())
 
             if len(closed_ans_score) != 0:

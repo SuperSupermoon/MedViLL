@@ -138,7 +138,6 @@ def main():
                         type=int,
                         default=123,
                         help="random seed for initialization")
-    
     parser.add_argument('--fp16', action='store_true', default = False,
                         help="Whether to use 16-bit float precision instead of 32-bit")
     parser.add_argument('--fp32_embedding', action='store_true',default = False,
@@ -167,7 +166,6 @@ def main():
     parser.add_argument('--image_root', type=str, default='../../data/mimic/re_512_3ch/Train')
     parser.add_argument('--split', type=str, nargs='+', default=['train', 'valid'])
 
-    # parser.add_argument('--dist_url', default='file://[PT_OUTPUT_DIR]/nonexistent_file', type = str, help = 'url used to set up distributed training')
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
 
     parser.add_argument('--sche_mode', default='warmup_linear', type=str, help="warmup_linear | warmup_constant | warmup_cosine")
@@ -184,19 +182,14 @@ def main():
     args.local_rank = int(os.environ['LOCAL_RANK'])
     args.global_rank = int(os.environ["RANK"])
     args.world_size = int(os.environ['WORLD_SIZE'])
-    # os.environ['MASTER_ADDR'] = '127.0.0.1'
-    # os.environ['MASTER_PORT'] = '3412'
 
     if args.model_recover_path !=None:
         args.exp_name = args.model_recover_path.split('/')[-2]
     else:args.exp_name = 'finetune_only'
-    # args.output_dir = args.output_dir+'/revision/'+str(args.tasks)+'/'+args.generation_dataset+'_'+args.exp_name
-    args.output_dir = args.output_dir+'revision/'+str(args.tasks)+'/'+args.model_recover_path.split('/')[-3]+'_'+args.generation_dataset+'_'+args.exp_name
-    print("args.output_dir", args.output_dir)
+
     print('global_rank: {}, local rank: {}'.format(args.global_rank, args.local_rank))
         
     args.max_seq_length = args.max_len_b + args.len_vis_input + 3 # +3 for 2x[SEP] and [CLS]
-    # args.dist_url = args.dist_url.replace('[PT_OUTPUT_DIR]', args.output_dir)
     if args.model_recover_path !=None:
         args.config_path = args.model_recover_path.split('/')[:-1]
         args.config_path = ('/').join(args.config_path)+'/config.json'    
@@ -205,21 +198,15 @@ def main():
         args.config_path = ('/').join(args.config_path)+'/config.json'    
 
     if args.tasks=='vqa':
-        # args.src_file = '../../data/vqa_rad/data_RAD'
         args.src_file = '/home/data_storage/mimic-cxr/dataset/data_RAD'
         args.img_path = '/home/data_storage/mimic-cxr/dataset/vqa_image/vqa_512_3ch'
         args.train_dataset = '/home/data_storage/mimic-cxr/dataset/data_RAD/trainet.json'
-        args.file_valid_jpgs = '../../data/vqa_rad/vqa_rad_original_set.json'  
+        args.file_valid_jpgs = 'data/vqa_rad/vqa_rad_original_set.json'  
     else:
         if args.generation_dataset == 'mimic-cxr':
-            # args.src_file = '../../data/mimic/Train.jsonl'
-            # args.file_valid_jpgs = '../../data/mimic/Valid.jsonl'
             args.src_file = 'data/mimic/Train.jsonl'
             args.file_valid_jpgs = 'data/mimic/Valid.jsonl'
-
         else:
-            # args.src_file = '../../data/openi/Train.jsonl'
-            # args.file_valid_jpgs = '../../data/openi/Valid.jsonl'
             args.src_file = 'data/openi/Train.jsonl'
             args.file_valid_jpgs = 'data/openi/Valid.jsonl'
 
@@ -250,8 +237,7 @@ def main():
         raise ValueError("Invalid gradient_accumulation_steps parameter: {}, should be >= 1".format(
             args.gradient_accumulation_steps))
 
-    args.train_batch_size = int(
-        args.train_batch_size / args.gradient_accumulation_steps)
+    args.train_batch_size = int(args.train_batch_size / args.gradient_accumulation_steps)
 
     # fix random seed
     utils.set_seed(123)
@@ -259,8 +245,7 @@ def main():
     if args.wandb and utils.is_main_process():
         wandb.init(config=args, project='report_gen', entity='mimic-cxr',  name = args.exp_name, reinit=True)
 
-    tokenizer = BertTokenizer.from_pretrained(
-        args.bert_model, do_lower_case=True)
+    tokenizer = BertTokenizer.from_pretrained(args.bert_model, do_lower_case=True)
 
     print("args.mask_prob",args.mask_prob)
     print("args.train_batch_size",args.train_batch_size)
@@ -284,9 +269,6 @@ def main():
         s2s_prob=args.s2s_prob, # this must be set to 1.
         bi_prob=args.bi_prob, tasks=args.tasks)
 
-    # if args.world_size == 1:
-    #     train_sampler = RandomSampler(train_dataset, replacement=False)
-    # else:
     train_sampler = DistributedSampler(train_dataset)
 
     train_dataloader = torch.utils.data.DataLoader(train_dataset,
@@ -494,17 +476,13 @@ def main():
 
 def vqa_eval(args, device, logger, bi_uni_pipeline, tokenizer, model, results_dict):
     test_dataset = data_loader.Img2txtDataset(args, 'test',
-            args.src_file, args.image_root, args.split, args.train_batch_size,
+            args.src_file, args.image_root, args.split, 1,
             tokenizer, args.max_seq_length, file_valid_jpgs=args.file_valid_jpgs,
             bi_uni_pipeline=bi_uni_pipeline, use_num_imgs=args.use_num_imgs,
             s2s_prob=args.s2s_prob, # this must be set to 1.
             bi_prob=args.bi_prob, tasks=args.tasks)
-    # if args.world_size == 1:
     test_sampler = RandomSampler(test_dataset, replacement=True)
-    # else:
-    #     test_sampler = DistributedSampler(test_dataset)
-        
-    test_dataloader = DataLoader(test_dataset, batch_size=args.train_batch_size,sampler=test_sampler,num_workers=args.num_workers, shuffle=False, collate_fn=batch_list_to_batch_tensors,drop_last=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=1, sampler=test_sampler,num_workers=args.num_workers, shuffle=False, collate_fn=batch_list_to_batch_tensors,drop_last=True)
 
     for itr in range(args.random_bootstrap_testnum):
         logger.info("***** Running test *****")

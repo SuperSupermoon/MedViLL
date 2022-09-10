@@ -1,0 +1,7 @@
+wandb/
+output/
+finish/
+pickle_rw/
+preprocess/
+downstream_task/report_generation_and_vqa/output/
+downstream_task/report_generation_and_vqa/wandb/

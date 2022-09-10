@@ -85,8 +85,7 @@ $ python retrieval.py
 - Medical Visual Qestion Answering
 Example:
 ```
-$ cd MedViLL/downstream_task/report_generation_and_vqa
-$ python finetune.py --tasks vqa --s2s_prob 0 --bi_prob 1 --mask_prob 0
+$ python -m torch.distributed.launch --nproc_per_node=1 --master_port 9872 --use_env downstream_task/report_generation_and_vqa/finetune.py --model_recover_path pt_model/model.50.bin --tasks vqa --s2s_prob 0 --bi_prob 1 --mask_prob 0 --vqa_rad chest --vqa_eval
 ```
 
 - Report Generation

@@ -27,7 +27,7 @@ We provide five versions of BERT-based pre-trained weights with different types 
 We provide a pre-processed version of multiple datasets for each task as follows:
  
  Download each dataset to the path /data/[dataset].
-- [MIMIC-CXR](https://drive.google.com/file/d/1aVamW2kBkcVUxhq2lOi38mKHEQ33FhQZ/view?usp=sharing) (2.27 GB): Unique study of 91,685 AP view image and associated report pairs.
+- MIMIC-CXR: We don't provide MIMIC-CXR dataset due to the policy of data use agreement. Please download original datset from [PhysioNet](https://physionet.org/content/mimic-cxr-jpg/2.0.0/).
 - [OPEN-I](https://drive.google.com/file/d/1aAKW2UcR7KhX9rckYtNfTfzNYulgrzle/view?usp=sharing) (74.1 MB): Unique study of 3,547 AP and PA image-report pairs from the official Open-I dataset.
 - [VQA-RAD](https://drive.google.com/file/d/1zlNM7kQACaorfQD8n_Qtc5wkV_lh_60V/view?usp=sharing) (402 MB): 3,515 question answer pairs on 315 images (104 head CTs or MRIs, 107 Chest X-rays, and 104 abdominal CTs).
  

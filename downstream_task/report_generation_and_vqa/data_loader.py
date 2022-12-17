@@ -255,7 +255,7 @@ class Img2txtDataset(torch.utils.data.Dataset):
                         entry['answer']['labels'] = None
                         entry['answer']['scores'] = None
 
-                src_tk = '/home/mimic-cxr/dataset/vqa_image/vqa_512_3ch/'+entry['image_name']
+                src_tk = entry['image_name']
                 labels = answer['labels']
                 scores = answer['scores']
             
@@ -405,32 +405,31 @@ class Preprocess4Seq2seq(Pipeline):
             masked_pos.extend([0] * n_pad)
             masked_weights.extend([0] * n_pad)
 
-        change_path = img_path.split('/')
-        fixed_path = change_path[:-1]
-        fixed_path = "/".join(fixed_path)
-        static_path = change_path[-1:]
-        static_path = "/".join(static_path)
+        # change_path = img_path.split('/')
+        # fixed_path = change_path[:-1]
+        # fixed_path = "/".join(fixed_path)
+        # static_path = change_path[-1:]
+        # static_path = "/".join(static_path)
 
-        # Hard coded part to fix the path.
-        if self.args.s2s_prob == 1: # report generation. 
-            change_path = img_path.split('/')
-            fixed_path = change_path[:-2]
-            fixed_path = "/".join(fixed_path)
-            static_path = change_path[-2:]
-            static_path = "/".join(static_path)            
-            if fixed_path == '/home/mimic-cxr/dataset/image_preprocessing/re_512_3ch':
-                fixed_path = '/home/data_storage/mimic-cxr/dataset/image_preprocessing/re_512_3ch/'
-                img_path = fixed_path + static_path
-        else:
-            change_path = img_path.split('/')
-            fixed_path = change_path[:-1]
-            fixed_path = "/".join(fixed_path)
-            static_path = change_path[-1:]
-            static_path = "/".join(static_path)
-            if fixed_path == '/home/mimic-cxr/dataset/vqa_image/vqa_512_3ch':
-                fixed_path = '/home/data_storage/mimic-cxr/dataset/data_RAD/images/'
-                img_path = fixed_path + static_path
-
+        # # Hard coded part to fix the path.
+        # if self.args.s2s_prob == 1: # report generation. 
+        #     change_path = img_path.split('/')
+        #     fixed_path = change_path[:-2]
+        #     fixed_path = "/".join(fixed_path)
+        #     static_path = change_path[-2:]
+        #     static_path = "/".join(static_path)            
+        #     if fixed_path == '/home/mimic-cxr/dataset/image_preprocessing/re_512_3ch':
+        #         fixed_path = '/home/data_storage/mimic-cxr/dataset/image_preprocessing/re_512_3ch/'
+        #         img_path = fixed_path + static_path
+        # else:
+        #     change_path = img_path.split('/')
+        #     fixed_path = change_path[:-1]
+        #     fixed_path = "/".join(fixed_path)
+        #     static_path = change_path[-1:]
+        #     static_path = "/".join(static_path)
+        #     if fixed_path == '/home/mimic-cxr/dataset/vqa_image/vqa_512_3ch':
+        #         fixed_path = '/home/data_storage/mimic-cxr/dataset/data_RAD/images/'
+        #         img_path = fixed_path + static_path
 
         # loading images
         img = Image.open(img_path)

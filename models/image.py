@@ -4,9 +4,10 @@ import torch.nn as nn
 from einops import rearrange
 
 class ImageEncoder_pool(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, configs):
         super(ImageEncoder_pool, self).__init__()
         self.args = args
+        self.configs = configs
         model = torchvision.models.resnet50(pretrained=True)
         modules = list(model.children())[:-2]
         self.model = nn.Sequential(*modules)
@@ -24,16 +25,17 @@ class ImageEncoder_pool(nn.Module):
         pool = self.pool_func((W, H))
         out = torch.flatten(pool(out), start_dim=2).transpose(1, 2).contiguous() 
         # random pixel sampling
-        random_sampling = torch.randperm(out.size(1))[:self.args.num_image_embeds]
+        random_sampling = torch.randperm(out.size(1))[:self.configs['num_image_embeds']]
         random_sampling, _ = torch.sort(random_sampling)
         random_sample = out[:, random_sampling]
         return random_sample
 
 
 class ImageEncoder_cnn(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, configs):
         super(ImageEncoder_cnn, self).__init__()
         self.args = args
+        self.configs = configs
         model = torchvision.models.resnet50(pretrained=True)
         modules = list(model.children())[:-2]
         self.model = nn.Sequential(*modules)
@@ -45,7 +47,7 @@ class ImageEncoder_cnn(nn.Module):
         vis_pe = torch.arange(out.size(1), dtype=torch.long).cuda()
         vis_pe = vis_pe.unsqueeze(0).expand(out.size(0), out.size(1))
 
-        random_sampling = torch.randperm(out.size(1))[:self.args.num_image_embeds]
+        random_sampling = torch.randperm(out.size(1))[:self.configs['num_image_embeds']]
         random_sampling, _ = torch.sort(random_sampling)
 
         random_sample = out[:, random_sampling]

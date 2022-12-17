@@ -1,0 +1,39 @@
+# train_dataset: 'data/mimic/Train.jsonl'
+# test_dataset: 'data/mimic/Valid.jsonl'
+
+train_dataset: '/data/public/rw/aicad/processed-512-8bit/public/mimic-cxr-jpg/v1/dataset_frontal_train.csv'
+valid_dataset: '/data/public/rw/aicad/processed-512-8bit/public/mimic-cxr-jpg/v1/dataset_frontal_valid.csv'
+test_dataset: '/data/public/rw/aicad/processed-512-8bit/public/mimic-cxr-jpg/v1/dataset_frontal_test.csv'
+
+# each train_file (json) contains a python list where each item is {'image': img_path, 'caption': text or list_of_text }               
+bert_config: 'configs/config_bert.json'
+
+epochs: 50
+batch_size: 36
+num_workers: 4
+img_encoder: random-pixel #full-fiber, ViT
+img_size: 512
+img_embed_pool_type: max
+num_image_embeds: 180 #256
+img_channel: 3
+image_res: 224
+vision_width: 768
+embedding_size: 768
+hidden_size: 768
+batch_size: 32
+temp: 0.07
+lr: 0.00001 #1e-5
+gradient_accumulation_steps: 4
+warmup: 0.1
+warmup_steps: 0
+tokenizer: "bert-base-uncased"
+bert_model: "bert-base-scratch"
+vocab_size: 30522
+
+beta1: 0.9
+beta2: 0.999
+eps: 1e-6
+weight_decay: 0.01
+
+seq_len: 253
+max_seq_len: 512

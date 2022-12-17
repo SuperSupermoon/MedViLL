@@ -8,40 +8,44 @@ import datetime
 import torch.nn as nn
 import numpy as np
 
-from models.cxrbert_origin import CXRBERT
+from models.MedViLL_origin import MedViLL
 
 from transformers.optimization import AdamW
 from transformers import BertConfig, AlbertConfig, AutoConfig
 
 
-class CXRBERT_Trainer():
-    def __init__(self, args, train_dataloader, test_dataloader=None):
+class MedViLL_Trainer():
+    def __init__(self, args, configs, train_dataloader, test_dataloader=None):
         self.args = args
-        cuda_condition = torch.cuda.is_available() and args.with_cuda
-        self.device = torch.device("cuda" if cuda_condition else "cpu")
+        self.configs = configs
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print('Current cuda device ', torch.cuda.current_device())  # check
 
         if args.weight_load:
-            config = AutoConfig.from_pretrained(args.pre_trained_model_path)
+            model_config = AutoConfig.from_pretrained(args.pre_trained_model_path)
             model_state_dict = torch.load(os.path.join(args.pre_trained_model_path, 'pytorch_model.bin'))
-            self.model = CXRBERT.from_pretrained(args.pre_trained_model_path, state_dict=model_state_dict,
-                                                 config=config, args=args).to(self.device)
+            self.model = MedViLL.from_pretrained(args.pre_trained_model_path, state_dict=model_state_dict,
+                                model_config=model_config, args=args, configs=configs).to(self.device)
             print('resume')
-            print(config)
+            print(model_config)
         else:
-            config = BertConfig.from_pretrained("bert-base-uncased")
-            self.model = CXRBERT(config, args).to(self.device)
+            model_config = BertConfig.from_pretrained("bert-base-uncased")
+            self.model = MedViLL(model_config, args, configs).to(self.device)
 
-        if args.with_cuda and torch.cuda.device_count() > 1:
-            print("Using %d GPUS for BERT" % torch.cuda.device_count())
-            self.model = nn.DataParallel(self.model, device_ids=args.cuda_devices)
+        # if torch.cuda.device_count() > 1:
+        #     print("Using %d GPUS for BERT" % torch.cuda.device_count())
+        #     self.model = nn.DataParallel(self.model, device_ids=args.cuda_devices)
 
+        self.model_without_ddp = self.model
+        if torch.cuda.device_count() > 1:
+            model = torch.nn.parallel.DistributedDataParallel(self.model, device_ids=[args.gpu])
+            self.model_without_ddp = model.module
+        
         self.train_data = train_dataloader
         self.test_data = test_dataloader
-        self.optimizer = AdamW(self.model.parameters(), lr=args.lr)
+        self.optimizer = AdamW(self.model.parameters(), lr=self.configs['lr'])
         self.mlm_criterion = nn.CrossEntropyLoss(ignore_index=-100)
         self.itm_criterion = nn.CrossEntropyLoss()
-        self.log_freq = args.log_freq
         self.step_cnt = 0
         print("Total Parameters:", sum([p.nelement() for p in self.model.parameters()]))
 
@@ -57,7 +61,8 @@ class CXRBERT_Trainer():
         total_valid_correct, total_valid_element, total_mlm_valid_correct, total_mlm_valid_element = 0,0,0,0
 
         for i, data in train_data_iter:
-            cls_tok, input_ids, txt_labels, attn_masks, img, segment, is_aligned, sep_tok, itm_prob = data
+            cls_tok, input_ids, txt_labels, attn_masks, img, segment, is_aligned, sep_tok = data
+            
             cls_tok = cls_tok.to(self.device)
             input_ids = input_ids.to(self.device)
             txt_labels = txt_labels.to(self.device)
@@ -116,7 +121,7 @@ class CXRBERT_Trainer():
         with torch.no_grad():
             eval_losses, eval_mlm_loss, eval_itm_loss = [], [], []            
             for i, data in test_data_iter:
-                cls_tok, input_ids, txt_labels, attn_masks, img, segment, is_aligned, sep_tok, itm_prob = data
+                cls_tok, input_ids, txt_labels, attn_masks, img, segment, is_aligned, sep_tok = data
                 cls_tok = cls_tok.to(self.device)
                 input_ids = input_ids.to(self.device)
                 txt_labels = txt_labels.to(self.device)

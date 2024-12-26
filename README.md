@@ -1,6 +1,6 @@
 # MedViLL
 
-Jong Hak Moon, Hyungyung Lee, Woncheol Shin, Young-Hak Kim, Edward Choi|[Paper](https://ieeexplore.ieee.org/abstract/document/9894658)
+Jong Hak Moon, Hyungyung Lee, Woncheol Shin, Young-Hak Kim, Edward Choi ([Paper](https://ieeexplore.ieee.org/abstract/document/9894658))
 
 
 This repository provides the code for MedViLL(Medical Vision Language Learner).
